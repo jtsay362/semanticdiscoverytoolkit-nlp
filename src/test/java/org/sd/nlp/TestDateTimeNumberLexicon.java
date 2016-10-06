@@ -23,6 +23,9 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+
 /**
  * JUnit Tests for the DateTimeNumberLexicon class.
  * <p>
@@ -33,7 +36,12 @@ public class TestDateTimeNumberLexicon extends TestCase {
   public TestDateTimeNumberLexicon(String name) {
     super(name);
   }
-  
+
+  private final Calendar CURRENT_CALENDAR = new GregorianCalendar();
+  private final int FUTURE_YEAR = CURRENT_CALENDAR.get(Calendar.YEAR) + 2;
+  private final String FUTURE_FOUR_DIGIT_YEAR_STRING = "" + FUTURE_YEAR;
+  private final String FUTURE_TWO_DIGIT_YEAR_STRING = "" + (FUTURE_YEAR % 100);
+
   private final DateTimeNumberLexicon buildLexicon(int minYear) {
     final CategoryFactory categoryFactory = new CategoryFactory();
     categoryFactory.defineCategory("YEAR", false);
@@ -54,7 +62,7 @@ public class TestDateTimeNumberLexicon extends TestCase {
   private final void verify(DateTimeNumberLexicon lexicon, String input, int tokenIndex,
                             boolean hasYear, boolean hasMonth, boolean hasDay,
                             boolean hasHour, boolean hasMinute, boolean hasSecond) {
-    
+
     final StringWrapper stringWrapper = new StringWrapper(input, DateTimeBreakStrategy.getInstance());
     StringWrapper.SubString subString = stringWrapper.getShortestSubString(0);
     int num = (tokenIndex < 0) ? -tokenIndex : tokenIndex;
@@ -87,6 +95,8 @@ public class TestDateTimeNumberLexicon extends TestCase {
     final Categories categories = subString.getCategories();
 
     if (!isYear) {
+      System.out.println("input = " + input + ", categories = " + categories);
+
       assertTrue(categories == null || !categories.hasType(lexicon.getYearCategory()));
     }
     else {
@@ -156,8 +166,7 @@ public class TestDateTimeNumberLexicon extends TestCase {
     verifyYear(lexicon, "1902", true);
     verifyYear(lexicon, "2006", true);
     verifyYear(lexicon, "06", true);
-    verifyYear(lexicon, "2017", false);
-    verifyYear(lexicon, "17", true);
+    verifyYear(lexicon, FUTURE_FOUR_DIGIT_YEAR_STRING, false);
 
     lexicon = buildLexicon(1990);
     verifyYear(lexicon, "345", false);
@@ -170,8 +179,8 @@ public class TestDateTimeNumberLexicon extends TestCase {
     verifyYear(lexicon, "1902", false);
     verifyYear(lexicon, "2006", true);
     verifyYear(lexicon, "06", true);
-    verifyYear(lexicon, "2017", false);
-    verifyYear(lexicon, "17", false);
+    verifyYear(lexicon, FUTURE_FOUR_DIGIT_YEAR_STRING, false);
+    verifyYear(lexicon, FUTURE_TWO_DIGIT_YEAR_STRING, false);
 
     lexicon = buildLexicon(2003);
     verifyYear(lexicon, "345", false);
@@ -184,8 +193,8 @@ public class TestDateTimeNumberLexicon extends TestCase {
     verifyYear(lexicon, "1902", false);
     verifyYear(lexicon, "2006", true);
     verifyYear(lexicon, "06", true);
-    verifyYear(lexicon, "2017", false);
-    verifyYear(lexicon, "17", false);
+    verifyYear(lexicon, FUTURE_FOUR_DIGIT_YEAR_STRING, false);
+    verifyYear(lexicon, FUTURE_TWO_DIGIT_YEAR_STRING, false);
   }
 
   public static Test suite() {
